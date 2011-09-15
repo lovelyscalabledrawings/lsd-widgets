@@ -22,16 +22,19 @@ LSD.Widget.Table.Calendar = new Class({
   Extends: LSD.Widget.Table,
   
   options: {
-    date: null,
     format: {
       caption: "%B %Y"
     },
-    classes: ['calendar'],
+    classes: Array.object('calendar'),
+    pseudos: Array.object('date'),
     events: {
       _calendar: {
         self: {
           'attach': function() {
-            this.setDate(this.options.date);
+            this.setDate(this.getDefaultDate());
+          },
+          setTable: function() {
+            if (this.date && !this.selected) this.setDay(this.date);
           }
         },
         element: {
@@ -62,6 +65,10 @@ LSD.Widget.Table.Calendar = new Class({
     var date = this.date ? this.date.clone() : new Date;
     var day = this.getDayFromCell(cell);
     this.setDate(date.set('date', day));
+  },
+  
+  getDefaultDate: function() {
+    return new Date
   },
   
   touchDate: function(e) {
@@ -118,11 +125,13 @@ LSD.Widget.Table.Calendar = new Class({
     if (monthSet) this.setMonth(this.firstDay);
     if (monthSet || day != this.day) {
       this.day = day;
-      var cell = this.getCellByDay(this.day);
-      if (this.selected) this.setCell(this.selected);
-      this.selected = cell;
-      this.setCell(this.selected);
-      this.fireEvent('setDay', [day, cell]);
+      if (this.table) {
+        var cell = this.getCellByDay(this.day);
+        if (this.selected) this.setCell(this.selected);
+        this.selected = cell;
+        this.setCell(this.selected);
+        this.fireEvent('setDay', [day, cell]);
+      }
     }
   },
   
@@ -156,7 +165,8 @@ LSD.Widget.Table.Calendar = new Class({
     if (row.length < 7) 
       for (var i = 0, j = data.length - 1, k = (7 - ((last + day) % 7)); i < k; i++) 
         data[j].push(' ');
-    if (this.built) this.setTable(table);
-    else Object.extend(this.options, table);
+        
+    if (this.built && this.table) this.setTable(table);
+    else Object.merge(this.options, table);
   }
 });

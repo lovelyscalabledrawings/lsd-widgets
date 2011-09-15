@@ -23,21 +23,18 @@ LSD.Widget.Table = new Class({
     header: null,
     footer: null,
     caption: null,
-    events: {
-      _table: {
-        self: {
-          build: function() {
-            var el = this.element;
-            this.head = el.tHead;
-            this.body = (el.tBodies ? el.tBodies[0] : el.tBody);
-            this.foot = el.tFoot;
-            this.setTable(this.options);
-          }
+    actions: {
+      table: {
+        enable: function() {
+          var el = this.element;
+          this.head = el.tHead;
+          this.body = (el.tBodies ? el.tBodies[0] : el.tBody);
+          this.foot = el.tFoot;
+          this.setTable(this.options);
         }
       }
     },
-    tag: 'table',
-    pseudos: Array.object('list')
+    tag: 'table'
   },
   
   setTable: function(table) {
@@ -46,6 +43,8 @@ LSD.Widget.Table = new Class({
     if (table.header) this.setHeader(table.header);
     if (table.data) this.setData(table.data);
     if (table.footer) this.setFooter(table.footer);
+    this.fireEvent('setTable', [this, table])
+    this.table = true;
   },
   
   setData: function(data) {
