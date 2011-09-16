@@ -69,14 +69,10 @@ LSD.Widget.Select.Button = LSD.Widget.Button;
 LSD.Widget.Select.Option = new Class({
   options: {
     tag: 'option',
-    pseudos: Array.object('item', 'textual')
+    pseudos: Array.object('item', 'clickable', 'textual')
   },
   
   getTitle: function() {
     return this.element.get('text').trim();
-  },
-  
-  getValue: function() {
-    return this.attributes.value || this.element.get('text').trim();
   }
 });
