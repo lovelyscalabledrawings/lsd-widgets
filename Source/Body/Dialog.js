@@ -38,16 +38,25 @@ LSD.Widget.Body.Dialog = new Class({
           'click:relay(.cancel)': 'cancel'
         },
         self: {
+          build: function() {
+            this.hide()
+          },
           submit: function() {
             this.hide();
           },
-          cancel: 'hide'
+          cancel: 'hide',
+          invoke: function() {
+            this.show();
+          }
         },
         setRole: function() {
           var kind = this.attributes.kind;
           if (!kind) return;
-          var element = Slick.find(document.body, 'dialog#' + kind);
-          if (element) return {origin: element};
+          var template = LSD.Template[kind];
+          if (template) {
+            this.template = template.clone(this);
+            this.template.show();
+          }
         }
       }
     },
@@ -64,7 +73,5 @@ LSD.Widget.Body.Dialog = new Class({
   
   getParentElement: function() {
     return document.body;
-  },
-  
-  hidden: true
+  }
 });
