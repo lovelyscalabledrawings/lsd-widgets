@@ -31,7 +31,6 @@ LSD.Widget.Body.Dialog = new Class({
     },
     classes: Array.object('dialog'),
     pseudos: Array.object('fieldset', 'submittable', 'invokable', 'command', 'focusable'),
-    clone: true,
     events: {
       _dialog: {
         element: {
@@ -43,7 +42,7 @@ LSD.Widget.Body.Dialog = new Class({
           var template = LSD.Template[kind];
           if (template) {
             this.template = template.clone(this);
-            this.template.show();
+            this.template.attach();
           }
         }
       }
