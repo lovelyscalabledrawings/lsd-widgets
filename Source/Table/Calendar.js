@@ -49,7 +49,7 @@ LSD.Widget.Table.Calendar = new Class({
   
   setRow: function(days) {
     var row = LSD.Widget.Table.prototype.setRow.apply(this, arguments);
-    var number = days[0]
+    var number = parseInt(days[0]);
     if ((number <= this.day) && (number + 7 > this.day)) {
       row.className = 'selected';
     } else if (number > this.day) {
