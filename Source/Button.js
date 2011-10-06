@@ -23,7 +23,6 @@ provides:
 LSD.Widget.Button = new Class({  
   options: {
     tag: 'button',
-    inline: true,
     pseudos: Array.object('touchable', 'clickable', 'command')
   }
 });
