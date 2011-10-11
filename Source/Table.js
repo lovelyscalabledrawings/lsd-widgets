@@ -51,21 +51,22 @@ LSD.Widget.Table = new Class({
     if (!this.body) this.body = new Element('tbody').inject(this.element);
     else this.body.empty()
     this.rows = [];
-    for (var i = 0, row; row = data[i++];) {
-      row = this.setRow(row)
+    for (var i = 0, row; row = data[i]; i++) {
+      row = this.setRow(row, i)
       this.rows.push(row);
       this.body.appendChild(row);
     }
   },
   
-  setRow: function(values) {
+  setRow: function(values, index) {
     var element = document.createElement('tr');
-    for (var i = 0, value; value = values[i++];) element.appendChild(this.setCell(value));
+    for (var i = 0, value; value = values[i]; i++) 
+      element.appendChild(this.setCell(value, i, index));
     return element;
   },
   
-  setCell: function(value) {
-    return this.setCellContent(document.createElement('td'), value);
+  setCell: function(value, cell, row) {
+    return this.setCellContent(document.createElement('td'), value, cell, row);
   },
   
   setCellContent: function(element, value) {
