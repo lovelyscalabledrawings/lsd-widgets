@@ -33,6 +33,9 @@ LSD.Widget.Body.Dialog = new Class({
     pseudos: Array.object('fieldset', 'submittable', 'invokable', 'command', 'focusable'),
     events: {
       _dialog: {
+        hide: function() {
+          if (this.invoker) this.revoke(true);
+        },
         element: {
           'click:relay(.cancel)': 'cancel'
         },
