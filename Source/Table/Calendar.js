@@ -102,15 +102,17 @@ LSD.Widget.Table.Calendar = new Class({
     return target;
   },
   
-  setCell: function(number) {
+  setCell: function(number, cell, row) {
     var cell = LSD.Widget.Table.prototype.setCell.apply(this, arguments);
     if (cell == number) number = this.getDayFromCell(cell);
+    if (row == 0 && number > 7) var prefix = true;
+    else if (row == this.rows.length - 1 && number < 7) var suffix = true;
     if (number == ' ') {
       cell.className = 'empty';
-    } else if (number == this.day) {
+    } else if (number == this.day && !prefix && !suffix) {
       cell.className = 'selected';
       this.selected = cell;
-    } else if (number > this.day) {
+    } else if (number > this.day || suffix) {
       cell.className = 'future';
     } else {
       cell.className = 'past';
@@ -120,9 +122,10 @@ LSD.Widget.Table.Calendar = new Class({
   
   setDay: function(date) {
     var day = date.getDate();
-    this.firstDay = date.clone().set('date', 1);
-    var monthSet = !this.month || this.firstDay.compare(this.month);
-    if (monthSet) this.setMonth(this.firstDay);
+    var first = date.clone().set('date', 1);
+    var monthSet = !this.firstDay || this.firstDay.compare(first);
+    this.firstDay = first;
+    if (monthSet) this.setMonth(first);
     if (monthSet || day != this.day) {
       this.day = day;
       if (this.table) {
@@ -145,7 +148,6 @@ LSD.Widget.Table.Calendar = new Class({
   
   setMonth: function(date) {
     delete this.selected;
-    this.month = date;
     var table = {
       caption: date.format(this.options.format.caption),
       data: [[]],
@@ -155,16 +157,16 @@ LSD.Widget.Table.Calendar = new Class({
     if (this.options.footer !== false) table.footer = table.header;
     var day = date.get('day');
     var last = date.getLastDayOfMonth();
-    for (var i = 0; i < day; i++) data[0].push(' ');
+    for (var i = 0; i < day; i++) data[0].push(date.clone().increment('day', - day + i).get('date'));
     for (var i = 1; i <= last; i++) {
       var index = Math.floor((i + day - 1) / 7);
       var row = data[index];
       if (!row) row = data[index] = [];
       row.push(i);
     }
-    if (row.length < 7) 
+    if (row.length < 7)
       for (var i = 0, j = data.length - 1, k = (7 - ((last + day) % 7)); i < k; i++) 
-        data[j].push(' ');
+        data[j].push(date.clone().increment('day', last + i).get('date'));
         
     if (this.built && this.table) this.setTable(table);
     else Object.merge(this.options, table);
