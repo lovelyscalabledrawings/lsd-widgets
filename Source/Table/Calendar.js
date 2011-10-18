@@ -41,23 +41,10 @@ LSD.Widget.Table.Calendar = new Class({
           'touchstart:relay(td:not(.empty))': 'touchDate',
           'touchend': 'untouchDate',
           'touchcancel': 'untouchDate',
-          'click:relay(td:not(.empty))': 'selectDate'
+          'touchstart:relay(td)': 'selectDate'
         }
       }
     }
-  },
-  
-  setRow: function(days) {
-    var row = LSD.Widget.Table.prototype.setRow.apply(this, arguments);
-    var number = parseInt(days[0]);
-    if ((number <= this.day) && (number + 7 > this.day)) {
-      row.className = 'selected';
-    } else if (number > this.day) {
-      row.className = 'future';
-    } else {
-      row.className = 'past';
-    }
-    return row;
   },
   
   selectDate: function(e) {
@@ -87,8 +74,20 @@ LSD.Widget.Table.Calendar = new Class({
     return parseInt(Element.get(cell, 'text'));
   },
   
+  getDayFromRow: function(row) {
+    var items = row.getElementsByTagName('td');
+    var i = this.getDayFromCell(items[0]);
+    if (i > 20 && this.day < 20) {
+      var j = this.getDayFromCell(items[items.length - 1]);
+      if (j < 20) {
+        return j - 6;
+      }
+    } 
+    return i;
+  },
+  
   getCellByDay: function(day) {
-    var index = day + this.firstDay.get('day') - 1;
+    var index = day + this.firstDay.get('day') - 1 - (Locale.get('Date.firstDayOfWeek') || 0);
     var row = this.rows[Math.floor(index / 7)];
     var weekday = index % 7;
     for (var i = 0, j = 0, node, nodes = row.childNodes; node = nodes[i++];)
@@ -102,11 +101,32 @@ LSD.Widget.Table.Calendar = new Class({
     return target;
   },
   
-  setCell: function(number, cell, row) {
-    var cell = LSD.Widget.Table.prototype.setCell.apply(this, arguments);
-    if (cell == number) number = this.getDayFromCell(cell);
-    if (row == 0 && number > 7) var prefix = true;
-    else if (row == this.rows.length - 1 && number < 7) var suffix = true;
+  setRow: function(row) {
+    if (row.localName) {
+      var day = this.getDayFromRow(row);
+    } else {
+      var day = parseInt(row[0]);
+      var row = LSD.Widget.Table.prototype.setRow.apply(this, arguments);
+    }
+    if ((day <= this.day) && (day + 7 > this.day)) {
+      row.className = 'selected';
+    } else if (day > this.day) {
+      row.className = 'future';
+    } else {
+      row.className = 'past';
+    }
+    return row;
+  },
+  
+  setCell: function(cell, i, j) {
+    if (cell.localName) {
+      var number = this.getDayFromCell(cell);
+    } else {
+      var number = cell;
+      cell = LSD.Widget.Table.prototype.setCell.apply(this, arguments);
+    }
+    if (j == 0 && number > 7) var prefix = true;
+    else if (j == this.rows.length - 1 && number < 7) var suffix = true;
     if (number == ' ') {
       cell.className = 'empty';
     } else if (number == this.day && !prefix && !suffix) {
@@ -116,6 +136,11 @@ LSD.Widget.Table.Calendar = new Class({
       cell.className = 'future';
     } else {
       cell.className = 'past';
+    }
+    
+    if (!this.today) this.today = new Date;
+    if (number == this.today.get('date')) {
+      cell.className += ' today';
     }
     return cell;
   },
@@ -130,9 +155,13 @@ LSD.Widget.Table.Calendar = new Class({
       this.day = day;
       if (this.table) {
         var cell = this.getCellByDay(this.day);
-        if (this.selected) this.setCell(this.selected);
+        if (this.selected) {
+          this.setCell(this.selected);
+          this.setRow(this.selected.parentNode);
+        }
         this.selected = cell;
         this.setCell(this.selected);
+        this.setRow(this.selected.parentNode);
         this.fireEvent('setDay', [day, cell]);
       }
     }
@@ -151,11 +180,15 @@ LSD.Widget.Table.Calendar = new Class({
     var table = {
       caption: date.format(this.options.format.caption),
       data: [[]],
-      header: Locale.get('Date.days_abbr')
+      header: Locale.get('Date.days_abbr').map(function(d) { return d.replace('.', '')})
     };
+    var first = Locale.get('Date.firstDayOfWeek');
+    if (first) {
+      table.header.push.call(table.header, table.header.splice(0, first))
+    }
     var data = table.data;
     if (this.options.footer !== false) table.footer = table.header;
-    var day = date.get('day');
+    var day = date.get('day') - first;
     var last = date.getLastDayOfMonth();
     for (var i = 0; i < day; i++) data[0].push(date.clone().increment('day', - day + i).get('date'));
     for (var i = 1; i <= last; i++) {
