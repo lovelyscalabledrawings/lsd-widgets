@@ -94,19 +94,24 @@ LSD.Widget.Table = new Class({
   },
   
   setHeader: function(header) {
-    if (!this.head) this.head = new Element('thead').inject(this.element);
-    else this.head.empty()
+    if (!this.head) {
+      this.head = new Element('thead').inject(this.element);
+      this.headRow = new Element('tr').inject(this.head);
+    } else this.headRow.empty();
+    
     header.each(function(name) {
-      this.head.appendChild(this.setHeaderCell(name))
+      this.headRow.appendChild(this.setHeaderCell(name))
     }, this);
     return this.head;
   },
   
   setFooter: function(footer) {
-    if (!this.foot) this.foot = new Element('tfoot').inject(this.element);
-    else this.foot.empty()
+    if (!this.foot) {
+      this.foot = new Element('tfoot').inject(this.element);
+      this.footRow = new Element('tr').inject(this.foot);
+    } else this.footRow.empty()
     footer.each(function(name) {
-      this.foot.appendChild(this.setHeaderCell(name))
+      this.footRow.appendChild(this.setHeaderCell(name))
     }, this);
     return this.foot;
   }
