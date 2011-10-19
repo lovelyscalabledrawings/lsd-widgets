@@ -139,7 +139,7 @@ LSD.Widget.Table.Calendar = new Class({
     }
     
     if (!this.today) this.today = new Date;
-    if (number == this.today.get('date')) {
+    if (number == this.today.get('date') && this.today.get('month') == this.date.get('month')) {
       cell.className += ' today';
     }
     return cell;
