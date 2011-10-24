@@ -87,7 +87,9 @@ LSD.Widget.Table.Calendar = new Class({
   },
   
   getCellByDay: function(day) {
-    var index = day + this.firstDay.get('day') - 1 - (Locale.get('Date.firstDayOfWeek') || 0);
+    var first = this.firstDay.get('day') - 1;
+    var index = day + first - (Locale.get('Date.firstDayOfWeek') || 0);
+    if (first < 0) index += 7;
     var row = this.rows[Math.floor(index / 7)];
     var weekday = index % 7;
     for (var i = 0, j = 0, node, nodes = row.childNodes; node = nodes[i++];)
@@ -101,17 +103,19 @@ LSD.Widget.Table.Calendar = new Class({
     return target;
   },
   
-  setRow: function(row) {
+  setRow: function(row, i) {
+    if (i == null) 
+      for (var i = 0, children = row.parentNode.childNodes, child; (child = children[i]) && child != row; i++);
     if (row.localName) {
       var day = this.getDayFromRow(row);
     } else {
       var day = parseInt(row[0]);
       var row = LSD.Widget.Table.prototype.setRow.apply(this, arguments);
     }
-    if ((day <= this.day) && (day + 7 > this.day)) {
+    if ((day <= this.day && this.day <= day + 6) && (day < 20 || i > 2) && (day > 7 || i < 3)) {
       row.className = 'selected';
-    } else if (day > this.day) {
-      row.className = 'future';
+    } else if (day > this.day ? (i > 2 || day < 14) : (i < 2 && day < 14)) {
+      row.className = 'future'
     } else {
       row.className = 'past';
     }
@@ -126,7 +130,7 @@ LSD.Widget.Table.Calendar = new Class({
       cell = LSD.Widget.Table.prototype.setCell.apply(this, arguments);
     }
     if (j == 0 && number > 7) var prefix = true;
-    else if (j == this.rows.length - 1 && number < 7) var suffix = true;
+    else if (j > 2 && number < 7) var suffix = true;
     if (number == ' ') {
       cell.className = 'empty';
     } else if (number == this.day && !prefix && !suffix) {
@@ -150,9 +154,12 @@ LSD.Widget.Table.Calendar = new Class({
     var first = date.clone().set('date', 1);
     var monthSet = !this.firstDay || this.firstDay.compare(first);
     this.firstDay = first;
+    if (this.day != day) {
+      var changed = true;
+      this.day = day
+    }
     if (monthSet) this.setMonth(first);
-    if (monthSet || day != this.day) {
-      this.day = day;
+    if (monthSet || changed) {
       if (this.table) {
         var cell = this.getCellByDay(this.day);
         if (this.selected) {
@@ -190,6 +197,7 @@ LSD.Widget.Table.Calendar = new Class({
     if (this.options.footer !== false) table.footer = table.header;
     var day = date.get('day') - first;
     var last = date.getLastDayOfMonth();
+    if (day < 0) day += 7
     for (var i = 0; i < day; i++) data[0].push(date.clone().increment('day', - day + i).get('date'));
     for (var i = 1; i <= last; i++) {
       var index = Math.floor((i + day - 1) / 7);
@@ -198,8 +206,8 @@ LSD.Widget.Table.Calendar = new Class({
       row.push(i);
     }
     if (row.length < 7)
-      for (var i = 0, j = data.length - 1, k = (7 - ((last + day) % 7)); i < k; i++) 
-        data[j].push(date.clone().increment('day', last + i).get('date'));
+      for (var i = 0, k = (7 - ((last + day) % 7)); i < k; i++) 
+        row.push(date.clone().increment('day', last + i).get('date'));
         
     if (this.built && this.table) this.setTable(table);
     else Object.merge(this.options, table);
