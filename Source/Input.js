@@ -21,7 +21,7 @@ provides:
 */
 
 LSD.Widget.Input = new Class({
-  Extends: LSD.Trait.Input,
+  Implements: LSD.Trait.Input,
   
   options: {
     tag: 'input',

@@ -24,11 +24,15 @@ LSD.Widget.Label = new Class({
     has: {
       one: {
         control: {
+          selector: ':form-associated',
           collection: 'labels',
           states: {
             get: {
               invalid: 'invalid'
             }
+          },
+          expectation: function() {
+            return {combinator: '&&', tag: '*', pseudos: ['form-associated']}
           }
         }
       }
@@ -38,7 +42,7 @@ LSD.Widget.Label = new Class({
         widget[state ? 'addRelation' : 'removeRelation']('control', {
           expectation: function() {
             var id = this.attributes['for'];
-            if (id) return {id: id, combinator: '&&', tag: '*'};
+            return {id: id, combinator: '&&', tag: '*'};
           }
         });
       }
@@ -46,22 +50,25 @@ LSD.Widget.Label = new Class({
     pseudos: Array.object('clickable', 'command'),
     states: Array.object('invalid'),
     chain: {
-      focusControl: function() {
+      focusControl: function(event) {
         if (this.control) return {
           target: this.control,
           action: this.control.pseudos.clickable ? 'submit' : 'focus'
         };
       }
     },
+    scripts: {
+      label: 'focus(::control)'
+    },
     events: {
-      self: {
-        click: 'focusControl'
-      },
       element: {
-        click: function(event) {
-          if (event) event.preventDefault();
-        }
+        click: 'onLabelClick'
       }
     }
+  },
+  
+  onLabelClick: function(event) {
+    if (this.control && this.control.parentNode == this && event && event.event && event.target == this.element) event.preventDefault()
+    
   }
 });
