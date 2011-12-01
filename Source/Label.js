@@ -32,7 +32,7 @@ LSD.Widget.Label = new Class({
             }
           },
           expectation: function() {
-            return {combinator: '&&', tag: '*', pseudos: ['form-associated']}
+            return {combinator: ' ', tag: '*', pseudos: ['form-associated']}
           }
         }
       }
@@ -49,26 +49,5 @@ LSD.Widget.Label = new Class({
     },
     pseudos: Array.object('clickable', 'command'),
     states: Array.object('invalid'),
-    chain: {
-      focusControl: function(event) {
-        if (this.control) return {
-          target: this.control,
-          action: this.control.pseudos.clickable ? 'submit' : 'focus'
-        };
-      }
-    },
-    scripts: {
-      label: 'focus(::control)'
-    },
-    events: {
-      element: {
-        click: 'onLabelClick'
-      }
-    }
-  },
-  
-  onLabelClick: function(event) {
-    if (this.control && this.control.parentNode == this && event && event.event && event.target == this.element) event.preventDefault()
-    
   }
 });
