@@ -48,6 +48,6 @@ LSD.Widget.Label = new Class({
       }
     },
     pseudos: Array.object('clickable', 'command'),
-    states: Array.object('invalid'),
+    states: Array.object('invalid')
   }
 });
