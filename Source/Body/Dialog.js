@@ -36,6 +36,14 @@ LSD.Widget.Body.Dialog = new Class({
         hide: function() {
           if (this.invoker) this.revoke(true);
         },
+        revoke: function() {
+          if (this.invokation) this.invokation.enable()
+          delete this.invokation;
+        },
+        invoke: function() {
+          this.invokation = this.invoker;
+          if (this.invoker) this.invoker.disable()
+        },
         element: {
           'click:relay(.cancel)': 'cancel'
         },
